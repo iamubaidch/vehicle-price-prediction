@@ -1,23 +1,25 @@
-blinker==1.7.0
-click==8.1.7
-colorama==0.4.6
-flask==3.0.0
-flask-cors==4.0.0
+blinker @ file:///home/conda/feedstock_root/build_artifacts/blinker_1698890160476/work
+click @ file:///D:/bld/click_1692312014553/work
+colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1666700638685/work
+Flask @ file:///home/conda/feedstock_root/build_artifacts/flask_1696349106907/work
+Flask-Cors @ file:///home/conda/feedstock_root/build_artifacts/flask-cors_1687783436674/work
 gunicorn==21.2.0
-importlib-metadata==7.0.1
-itsdangerous==2.1.2
-jinja2==3.1.3
-joblib==1.3.2
-markupsafe==2.1.3
-numpy==1.26.3
+importlib-metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1703269254275/work
+itsdangerous @ file:///home/conda/feedstock_root/build_artifacts/itsdangerous_1648147185463/work
+Jinja2 @ file:///home/conda/feedstock_root/build_artifacts/jinja2_1704966972576/work
+joblib @ file:///home/conda/feedstock_root/build_artifacts/joblib_1691577114857/work
+MarkupSafe @ file:///D:/bld/markupsafe_1695367487974/work
+numpy @ file:///D:/bld/numpy_1704280620084/work/dist/numpy-1.26.3-cp312-cp312-win_amd64.whl#sha256=93f790eb49a3a805e0ddfa51fa0e194d1797c47e725c990cf5335382ac1070f2
 packaging==23.2
-pandas==2.1.4
-python-dateutil==2.8.2
-scikit-learn==1.3.2
-scipy==1.11.4
+pandas @ file:///D:/bld/pandas_1702057276393/work
+python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1626286286081/work
+pytz @ file:///home/conda/feedstock_root/build_artifacts/pytz_1693930252784/work
+scikit-learn @ file:///D:/bld/scikit-learn_1701932229152/work
+SciPy @ file:///C:/bld/scipy-split_1700812670982/work/dist/scipy-1.11.4-cp312-cp312-win_amd64.whl#sha256=21e38add607de3e53997eb08607cd0c831f91532af5c4a7f877e8cad88121ace
 setuptools==69.0.3
-six==1.16.0
-threadpoolctl==3.2.0
-tzdata==2023.3
-werkzeug==3.0.1
+six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
+threadpoolctl @ file:///home/conda/feedstock_root/build_artifacts/threadpoolctl_1689261241048/work
+tzdata @ file:///home/conda/feedstock_root/build_artifacts/python-tzdata_1703878702368/work
+Werkzeug @ file:///home/conda/feedstock_root/build_artifacts/werkzeug_1698235201373/work
 wheel==0.42.0
+zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1695255097490/work
