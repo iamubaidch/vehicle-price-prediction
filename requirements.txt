@@ -19,6 +19,6 @@ scipy==1.11.4
 setuptools==69.0.3
 six==1.16.0
 threadpoolctl==3.2.0
-tzdata==2023d
+tzdata==2023.3
 werkzeug==3.0.1
 wheel==0.42.0
