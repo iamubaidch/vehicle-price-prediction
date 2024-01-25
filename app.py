@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 cors = CORS(app)
 with open("RandomForestRegressorModel.pkl", "rb") as file:
-    model = pickle.load(file, protocol=pickle.HIGHEST_PROTOCOL)
+    model = pickle.load(file)
 
 df = pd.read_csv("New_cleaned_data.csv")
 
