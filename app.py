@@ -3,10 +3,13 @@ from flask_cors import CORS, cross_origin
 import pickle
 import pandas as pd
 import numpy as np
+import os
 
 app = Flask(__name__)
 cors = CORS(app)
-model = pickle.load(open("RandomForestRegressorModel.pkl", "rb"))
+with open("RandomForestRegressorModel.pkl", "rb") as file:
+    model = pickle.load(file, protocol=pickle.HIGHEST_PROTOCOL)
+
 df = pd.read_csv("New_cleaned_data.csv")
 
 
