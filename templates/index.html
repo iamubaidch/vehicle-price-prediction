@@ -1,286 +1,780 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head xmlns="http://www.w3.org/1999/xhtml">
-    <meta charset="UTF-8" />
-    <title>Car Price Predictor</title>
-    <link rel="stylesheet" href="static/css/style.css" />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css"
-    />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-      crossorigin="anonymous"
-    ></script>
 
-    <!-- Bootstrap CSS -->
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-      integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
-      crossorigin="anonymous"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
-  </head>
-  <body class="bg-dark">
-    <div class="container">
-      <div class="row">
-        <div class="card mt-50" style="width: 100%; height: 100%">
-          <div class="card-header" style="text-align: center">
-            <h1>Welcome to Car Price Predictor</h1>
-          </div>
-          <div class="card-body">
-            <div class="col-12" style="text-align: center">
-              <h5>
-                This app predicts the price of a car you want to sell. Try
-                filling the details below:
-              </h5>
-            </div>
-            <br />
-            <form method="post" accept-charset="utf-8" name="Modelform">
-              <div class="col-md-10 form-group" style="text-align: center">
-                <label><b>Select the company:</b> </label><br />
-                <select
-                  class="selectpicker form-control"
-                  id="company"
-                  name="company"
-                  required="1"
-                  onchange="loadCarModels()"
-                >
-                  <option value="" selected disabled>
-                    Select Vehicle Company
-                  </option>
-                  {% for company in companies %}
-                  <option value="{{ company }}">{{ company }}</option>
-                  {% endfor %}
-                </select>
-              </div>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="Auto Price Predictor" />
+    <meta name="keywords"
+        content="Used Car Price Prediction, Vehicle Value Estimator, Car Price Calculator, Deep Learning Car Valuation, Auto Price Analysis, Second-hand Car Pricing Tool, Online Vehicle Appraisal, AI Car Price Predictor, Car Market Value Checker, Accurate Used Car Valuation, Instant Car Price Estimate, Pre-owned Car Price Guide, Vehicle Price Analytics, Auto Value Forecaster, Machine Learning Vehicle Pricing, Car Depreciation Calculator, Buy Used Car Price Analysis, Car Trade-in Value Estimator, Real-time Car Valuation Tool" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auto Price Predictor</title>
+    <link rel="shortcut icon" href="../static/images/favicon.png" type="image/x-icon" />
+    <link rel="icon" href="../static/images/favicon.png" type="image/x-icon" />
+    <link rel="apple-touch-icon" sizes="152x152" href="../static/images/apple-touch-icon-152x152.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/css/flaticon.css" rel="stylesheet" />
+    <link href="../static/css/menu.css" rel="stylesheet" />
+    <link href="../static/css/style.css" rel="stylesheet" />
+    <link href="../static/css/responsive.css" rel="stylesheet" />
+</head>
 
-              <div class="col-md-10 form-group" style="text-align: center">
-                <label><b>Select the model:</b> </label><br />
-                <select
-                  class="selectpicker form-control"
-                  id="car_models"
-                  name="car_models"
-                  required="1"
-                >
-                  <option value="" selected disabled>
-                    Select Vehicle Model
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-md-10 form-group" style="text-align: center">
-                <label><b>Select the Transmission type:</b></label
-                ><br />
-                <select
-                  class="selectpicker form-control"
-                  id="transmission_type"
-                  name="transmission_type"
-                  required="1"
-                >
-                  <option value="" selected disabled>
-                    Select Transmission Type
-                  </option>
-                  {% for trans_type in transmission_type %}
-                  <option value="{{ trans_type }}">{{ trans_type }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div class="col-md-10 form-group" style="text-align: center">
-                <label><b>Select Year of Purchase:</b> </label><br />
-                <select
-                  class="selectpicker form-control"
-                  id="year"
-                  name="year"
-                  required="1"
-                >
-                  <option value="" selected disabled>
-                    Select Year of Purchase
-                  </option>
-                  {% for year in years %}
-                  <option value="{{ year }}">{{ year }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div class="col-md-10 form-group" style="text-align: center">
-                <label><b>Select the Fuel Type:</b> </label><br />
-                <select
-                  class="selectpicker form-control"
-                  id="fuel_type"
-                  name="fuel_type"
-                  required="1"
-                >
-                  <option value="" selected disabled>Select Fuel Type</option>
-                  {% for fuel in fuel_types %}
-                  <option value="{{ fuel }}">{{ fuel }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div class="col-md-10 form-group" style="text-align: center">
-                <label><b>Select the color:</b></label
-                ><br />
-                <select
-                  class="selectpicker form-control"
-                  id="vehicle_color"
-                  name="vehicle_color"
-                  required="1"
-                >
-                  <option value="" selected disabled>
-                    Select Vehicle Color
-                  </option>
-                  {% for color in vehicle_colors %}
-                  <option value="{{ color }}">{{ color }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div class="col-md-10 form-group" style="text-align: center">
-                <label><b>Select the Registration City:</b></label
-                ><br />
-                <select
-                  class="selectpicker form-control"
-                  id="registration_city"
-                  name="registration_city"
-                  required="1"
-                >
-                  <option value="" selected disabled>
-                    Select Registration City
-                  </option>
-                  {% for city in registration_cities %}
-                  <option value="{{ city }}">{{ city }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div class="col-md-10 form-group" style="text-align: center">
-                <label
-                  ><b
-                    >Enter the Number of Kilometres that the car has
-                    travelled:</b
-                  > </label
-                ><br />
-                <input
-                  type="text"
-                  class="form-control"
-                  id="kilo_driven"
-                  name="kilo_driven"
-                  placeholder="Enter the kilometres driven "
-                />
-              </div>
-
-              <div class="col-md-10 form-group" style="text-align: center">
-                <button
-                  class="btn btn-primary form-control"
-                  onclick="send_data()"
-                >
-                  Predict Price
-                </button>
-              </div>
-            </form>
-            <br />
-            <div class="row">
-              <div class="col-12" style="text-align: center">
-                <h4><span id="prediction"></span></h4>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+<body>
+    <div id="loading" class="loading--theme">
+        <div id="loading-center"><span class="loader"></span></div>
     </div>
 
+    <div id="page" class="page font--jakarta">
+        <header id="header" class="tra-menu navbar-dark inner-page-header white-scroll">
+            <div class="header-wrapper">
+                <div class="wsmobileheader clearfix">
+                    <span class="smllogo"><img src="../static/images/logo-blue.png" alt="mobile-logo" /></span>
+                    <a id="wsnavtoggle" class="wsanimated-arrow"><span></span></a>
+                </div>
+                <div class="wsmainfull menu clearfix">
+                    <div class="wsmainwp clearfix">
+                        <div class="desktoplogo">
+                            <a href="#" class="logo-black">
+                                <img class="light-theme-img" src="../static/images/logo-blue.png" alt="logo" />
+                            </a>
+                        </div>
+                        <div class="desktoplogo">
+                            <a href="#" class="logo-white"><img src="../static/images/logo-blue-white.png"
+                                    alt="logo" /></a>
+                        </div>
+                        <nav class="wsmenu clearfix">
+                            <ul class="wsmenu-list nav-theme">
+                                <li class="nl-simple" aria-haspopup="true"><a href="#hero-1" class="h-link">Home</a>
+                                </li>
+                                <li class="nl-simple" aria-haspopup="true"><a href="#about" class="h-link">About Us</a>
+                                </li>
+                                <li class="nl-simple" aria-haspopup="true"><a href="#features"
+                                        class="h-link">Features</a></li>
+                                <li class="nl-simple" aria-haspopup="true"><a href="#how-to-use" class="h-link">How To
+                                        Use</a></li>
+                                <li class="nl-simple" aria-haspopup="true">
+                                    <a href="#predictor"
+                                        class="btn r-04 btn--theme hover--theme last-link">Predictor</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section id="hero-1" class="bg--scroll hero-section">
+            <div class="container">
+                <div class="row d-flex align-items-center">
+
+
+                    <!-- HERO TEXT -->
+                    <div class="col-md-6">
+                        <div class="hero-1-txt  wow fadeInRight">
+
+                            <!-- Title -->
+                            <h2 class="s-40 w-700">Revolutionize your car's value with our
+                                AI-Driven price precision</h2>
+
+                            <!-- Text -->
+                            <p class="p-xl">Welcome to Auto Price Predictor, harnessing the power of AI to deliver
+                                instant, accurate valuations and drive your confidence in the used car market
+                            </p>
+
+                            <!-- Button -->
+                            <a href="#predictor" class="btn r-04 btn--theme hover--theme">Predict</a>
+                        </div>
+                    </div> <!-- END HERO TEXT -->
+                    <div class="col-md-6">
+                        <div class="hero-1-img wow fadeInLeft">
+                            <img class="img-fluid r-20" src="../static/images/banner.png" alt="hero-image">
+                        </div>
+                    </div>
+
+
+                </div> <!-- End row -->
+            </div> <!-- End container -->
+        </section> <!-- END HERO-1 -->
+        <section id="predictor" class="pb-50 inner-page-hero contacts-section division">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-10 col-lg-9">
+                        <div class="section-title text-center mb-80">
+                            <h2 class="s-52 w-700">Auto Price Predictor</h2>
+
+                            <p class="p-lg">Navigate car prices confidently with precise AI. Get the Precision in Every
+                                Prediction</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-md-11 col-lg-10 col-xl-8">
+                        <div class="form-holder">
+                            <form method="post" accept-charset="utf-8" name="Modelform" class="row contact-form">
+                                <div class="col-md-12 input-subject">
+                                    <select class="selectpicker form-select subject" id="company" name="company"
+                                        required onchange="loadCarModels()">
+                                        <option value="" selected disabled>
+                                            Select Vehicle Company
+                                        </option>
+                                        {% for company in companies %}
+                                        <option value="{{ company }}">{{ company }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-12 input-subject">
+                                    <select class="selectpicker form-select" id="car_models" name="car_models" required>
+                                        <option value="" selected disabled>
+                                            Select Vehicle Model
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12 input-subject">
+                                    <select class="selectpicker form-select" id="transmission_type"
+                                        name="transmission_type" required>
+                                        <option value="" selected disabled>
+                                            Select Transmission Type
+                                        </option>
+                                        {% for trans_type in transmission_type %}
+                                        <option value="{{ trans_type }}">{{ trans_type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-12 input-subject">
+                                    <select class="selectpicker form-select" id="year" name="year" required>
+                                        <option value="" selected disabled>
+                                            Select Year of Purchase
+                                        </option>
+                                        {% for year in years %}
+                                        <option value="{{ year }}">{{ year }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-12 input-subject">
+                                    <select class="selectpicker form-select" id="fuel_type" name="fuel_type" required>
+                                        <option value="" selected disabled>Select Fuel Type</option>
+                                        {% for fuel in fuel_types %}
+                                        <option value="{{ fuel }}">{{ fuel }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-12 input-subject">
+                                    <select class="selectpicker form-select" id="vehicle_color" name="vehicle_color"
+                                        required>
+                                        <option value="" selected disabled>
+                                            Select Vehicle Color
+                                        </option>
+                                        {% for color in vehicle_colors %}
+                                        <option value="{{ color }}">{{ color }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-12 input-subject">
+                                    <select class="selectpicker form-select" id="registration_city"
+                                        name="registration_city" required>
+                                        <option value="" selected disabled>
+                                            Select Registration City
+                                        </option>
+                                        {% for city in registration_cities %}
+                                        <option value="{{ city }}">{{ city }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-12 input-subject">
+                                    <input type="text" class="form-control" id="kilo_driven" name="kilo_driven"
+                                        placeholder="Enter the kilometres driven " required />
+                                </div>
+                                <div class="col-md-12 mt-15 form-btn text-center">
+                                    <button class="btn btn--theme hover--theme submit" onclick="send_data()">Predict
+                                        Price</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+        <span id="prediction" style="display: none;"></span>
+        <section id="about" class="bg--04 bg--fixed py-100 ct-01 content-section division"
+            style="background-image: url(../static/images/bg-04.jpg);">
+            <div class="container">
+                <div class="row d-flex align-items-center">
+
+
+                    <!-- TEXT BLOCK -->
+                    <div class="col-md-6 order-last order-md-2">
+                        <div class="txt-block left-column wow fadeInRight">
+
+                            <!-- Section ID -->
+                            <span class="section-id">About Us</span>
+
+                            <!-- Title -->
+                            <h2 class="s-40 w-700">Empowering Your Decisions with Data</h2>
+
+                            <!-- Text -->
+                            <p class="p-lg">At Auto Price Predictor, we're redefining the way you understand vehicle
+                                prices. Harnessing the strength of over 80,000 vehicle data, our AI-driven platform
+                                offers unmatched accuracy and insights. Our mission is to illuminate the path to fair
+                                pricing, whether you're buying, selling, or simply exploring.
+                                <br>
+                                &#x2022; Dive into our rich repository of over 80,000 vehicle records, ensuring
+                                comprehensive market coverage.
+                                <br>
+                                &#x2022; We prioritize clarity and ease, crafting an experience that demystifies auto
+                                pricing for everyone.
+                            </p>
+
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 order-first order-md-2">
+                        <div class="img-block j-img video-preview right-column wow fadeInLeft">
+
+
+                            <img class="img-fluid r-20" src="../static/images/about-img.jpg" alt="car-image">
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </section>
+        <section id="features" class="py-100 features-section division">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-10 col-lg-9">
+                        <div class="section-title mb-70">
+
+                            <!-- Title -->
+                            <h2 class="s-50 w-700">Features We Have</h2>
+
+                            <!-- Text -->
+                            <p class="s-21 color--grey">WHAT WE PROVIDE</p>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="fbox-wrapper">
+                    <div class="row row-cols-1 row-cols-md-2 rows-3">
+                        <div class="col">
+                            <div class="fbox-11 fb-1 wow fadeInUp">
+                                <div class="fbox-ico-wrap">
+                                    <div class="fbox-ico ico-50">
+                                        <div class="shape-ico">
+
+                                            <span class="flaticon-graphic color--theme"></span>
+                                            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill="#f4f9fc"
+                                                    d="M69.8,-23C76.3,-2.7,57.6,25.4,32.9,42.8C8.1,60.3,-22.7,67,-39.1,54.8C-55.5,42.7,-57.5,11.7,-48.6,-11.9C-39.7,-35.5,-19.8,-51.7,5.9,-53.6C31.7,-55.6,63.3,-43.2,69.8,-23Z"
+                                                    transform="translate(100 100)" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="fbox-txt">
+                                    <h6 class="s-22 w-700">Real-Time Market Analysis</h6>
+                                    <p>Dive into the current trends with our real-time market analysis, ensuring your
+                                        price predictions are always up-to-date.
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="fbox-11 fb-2 wow fadeInUp">
+                                <div class="fbox-ico-wrap">
+                                    <div class="fbox-ico ico-50">
+                                        <div class="shape-ico">
+
+
+                                            <span class="flaticon-wireframe color--theme"></span>
+                                            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill="#f4f9fc"
+                                                    d="M69.8,-23C76.3,-2.7,57.6,25.4,32.9,42.8C8.1,60.3,-22.7,67,-39.1,54.8C-55.5,42.7,-57.5,11.7,-48.6,-11.9C-39.7,-35.5,-19.8,-51.7,5.9,-53.6C31.7,-55.6,63.3,-43.2,69.8,-23Z"
+                                                    transform="translate(100 100)" />
+                                            </svg>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="fbox-txt">
+                                    <h6 class="s-22 w-700">User-Friendly Interface</h6>
+                                    <p>Navigate through our easy-to-use platform to get fast and accurate price
+                                        predictions with just a few clicks.
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="fbox-11 fb-3 wow fadeInUp">
+                                <div class="fbox-ico-wrap">
+                                    <div class="fbox-ico ico-50">
+                                        <div class="shape-ico">
+
+                                            <img src="../static/images/png_icons/ai.png">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="fbox-txt">
+                                    <h6 class="s-22 w-700">AI-Driven Insights</h6>
+                                    <p>Leverage our deep learning algorithms for smart, data-backed pricing decisions on
+                                        used vehicles.
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="fbox-11 fb-4 wow fadeInUp">
+
+                                <!-- Icon -->
+                                <div class="fbox-ico-wrap">
+                                    <div class="fbox-ico ico-50">
+                                        <div class="shape-ico">
+                                            <span class="flaticon-idea color--theme"></span>
+                                            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill="#f4f9fc"
+                                                    d="M69.8,-23C76.3,-2.7,57.6,25.4,32.9,42.8C8.1,60.3,-22.7,67,-39.1,54.8C-55.5,42.7,-57.5,11.7,-48.6,-11.9C-39.7,-35.5,-19.8,-51.7,5.9,-53.6C31.7,-55.6,63.3,-43.2,69.8,-23Z"
+                                                    transform="translate(100 100)" />
+                                            </svg>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="fbox-txt">
+                                    <h6 class="s-22 w-700">User Reviews and Ratings
+                                    </h6>
+                                    <p>Incorporate a section for users to review their experience with the predicted
+                                        prices and the actual sale price, enhancing trust and community engagement.
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+        <section id="how-to-use" class="gr--whitesmoke pb-30 inner-page-hero faqs-section division"
+            style="background-image: url(../static/images/bg-04.jpg);">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-11 col-xl-10">
+
+
+                        <div class="inner-page-title text-center">
+                            <h2 class="s-52 w-700 ">How To Use</h2>
+                            <p class="p-lg">Getting Started with Auto Price Predictor</p>
+                        </div>
+
+
+
+                        <div class="accordion-wrapper">
+                            <ul class="accordion">
+                                <li class="accordion-item is-active">
+                                    <div class="accordion-thumb">
+                                        <h4 class="s-28 w-700">How do I choose the correct vehicle make?</h4>
+                                    </div>
+                                    <div class="accordion-panel">
+                                        <div class="accordion-panel-item mb-35">
+                                            <div class="faqs-2-answer color--grey">
+                                                <p>Browse and select from our comprehensive dropdown list of automotive
+                                                    brands.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="accordion-item">
+                                    <div class="accordion-thumb">
+                                        <h4 class="s-28 w-700">Where do I find the vehicle model selection?</h4>
+                                    </div>
+                                    <div class="accordion-panel">
+                                        <div class="accordion-panel-item mb-35">
+                                            <div class="faqs-2-answer color--grey">
+                                                <p>
+                                                    Once you've selected the make, choose the exact
+                                                    model from the subsequent dropdown menu.
+
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="accordion-item">
+                                    <div class="accordion-thumb">
+                                        <h4 class="s-28 w-700"> How do I specify the transmission type?</h4>
+                                    </div>
+                                    <div class="accordion-panel">
+                                        <div class="accordion-panel-item mb-35">
+
+                                            <div class="faqs-2-answer color--grey">
+
+                                                <p>
+                                                    Click on the transmission dropdown and select the
+                                                    type that matches your vehicle - either 'Automatic'
+                                                    or 'Manual'.
+
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="accordion-item">
+                                    <div class="accordion-thumb">
+                                        <h4 class="s-28 w-700">
+
+                                            Where do I input the model year?
+
+                                        </h4>
+                                    </div>
+                                    <div class="accordion-panel">
+                                        <div class="accordion-panel-item mb-35">
+
+                                            <div class="faqs-2-answer color--grey">
+                                                <p>
+                                                    Find and select the year your vehicle was
+                                                    manufactured from our 'Model Year' dropdown menu,
+                                                    ensuring accuracy for a precise valuation.
+                                                </p>
+                                            </div>
+
+                                        </div>
+
+
+
+
+
+                                    </div>
+
+
+                                </li>
+
+
+
+                                <li class="accordion-item acc-last-item">
+                                    <div class="accordion-thumb">
+                                        <h4 class="s-28 w-700">What if I'm not sure about the fuel type?</h4>
+                                    </div>
+                                    <div class="accordion-panel">
+                                        <div class="accordion-panel-item mb-35">
+
+
+                                            <div class="faqs-2-answer color--grey">
+
+
+                                                <p>
+                                                    Refer to your vehicle's manual or registration
+                                                    documents to confirm if it's 'Petrol', 'Diesel', or
+                                                    'Hybrid', then choose the appropriate option from
+                                                    our fuel type dropdown.
+
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                </li>
+                                <li class="accordion-item acc-last-item">
+                                    <div class="accordion-thumb">
+                                        <h4 class="s-28 w-700">
+                                            How important is selecting the right color?
+                                        </h4>
+                                    </div>
+                                    <div class="accordion-panel">
+                                        <div class="accordion-panel-item mb-35">
+
+
+                                            <div class="faqs-2-answer color--grey">
+
+
+                                                <p>
+
+                                                    While color can influence resale value, for an
+                                                    accurate prediction, select the color that
+                                                    corresponds exactly to your vehicle's exterior from
+                                                    our color options.
+
+
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                </li>
+                                <li class="accordion-item acc-last-item">
+                                    <div class="accordion-thumb">
+                                        <h4 class="s-28 w-700">
+                                            Does registration city impact price prediction?
+                                        </h4>
+                                    </div>
+                                    <div class="accordion-panel">
+                                        <div class="accordion-panel-item mb-35">
+
+
+                                            <div class="faqs-2-answer color--grey">
+
+
+                                                <p>
+
+                                                    Yes, select the city where your vehicle is
+                                                    registered for location-specific valuations.
+
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                </li>
+                                <li class="accordion-item acc-last-item">
+                                    <div class="accordion-thumb">
+                                        <h4 class="s-28 w-700">
+                                            What should I input for mileage?
+                                        </h4>
+                                    </div>
+                                    <div class="accordion-panel">
+                                        <div class="accordion-panel-item mb-35">
+
+
+                                            <div class="faqs-2-answer color--grey">
+
+
+                                                <p>
+
+                                                    Enter the current mileage reading from your
+                                                    vehicle's odometer. Accurate mileage is crucial for
+                                                    a precise price estimate.
+
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                </li>
+
+                            </ul>
+                        </div>
+
+                        <div class="more-questions">
+                            <div class="more-questions-txt bg--white-400 r-100">
+                                <p class="p-lg">Do you Want to Review Us? <a href="mailto:review@autopricepredictor.me"
+                                        class="color--theme">Click Here</a></p>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="divider" />
+
+
+
+        <hr class="divider" />
+        <footer id="footer-3" class="pt-100 footer">
+            <div class="container">
+
+                <div class="row">
+
+                    <div class="col-xl-4">
+                        <div class="footer-info">
+                            <img class="footer-logo" src="../static/images/logo-blue.png" alt="footer-logo" />
+                            <p class="mt-15">Auto Price Predictor - Steering You Towards the Best Deal</p>
+                            <div class="footer-links fl-4">
+
+                                <ul class="footer-socials ico-25 text-center clearfix">
+                                    <li>
+                                        <a href="#"><span class="flaticon-facebook"></span></a>
+                                    </li>
+                                    <li>
+                                        <a href="#"><span class="flaticon-twitter"></span></a>
+                                    </li>
+                                    <li>
+                                        <a href="#"><span class="flaticon-github"></span></a>
+                                    </li>
+                                    <li>
+                                        <a href="#"><span class="flaticon-dribbble"></span></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-md-4 col-xl-4">
+                        <div class="footer-links fl-1">
+                            <!-- Title -->
+                            <h6 class="s-17">Useful Links</h6>
+
+                            <!-- Links -->
+                            <ul class="foo-links clearfix">
+                                <li>
+                                    <p><a href="#hero-1">Home</a></p>
+                                </li>
+                                <li>
+                                    <p><a href="#predictor">Predictor</a></p>
+                                </li>
+                                <li>
+                                    <p><a href="#about">About Us</a></p>
+                                </li>
+                                <li>
+                                    <p><a href="#features">Features</a></p>
+                                </li>
+                                <li>
+                                    <p><a href="#how-to-use">How To Use</a></p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6 col-md-4">
+                        <div class="footer-links fl-4">
+                            <!-- Title -->
+                            <h6 class="s-17">Connect With Us</h6>
+
+                            <!-- Mail Link -->
+                            <p class="footer-mail-link ico-25">
+                                <a href="tel:+xxxxxxxx">+xxxxxxxx</a>
+                            </p>
+                            <p class="footer-mail-link ico-25">
+                                <a href="mailto:review@autopricepredictor.me">review@autopricepredictor.me</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+                <div class="bottom-footer">
+                    <div class="row row-cols-1 row-cols-md-2 d-flex align-items-center">
+                        <div class="col">
+                            <div class="footer-copyright">
+                                <p class="p-sm">&copy; 2024 Auto Price Predictor. <span>All Rights Reserved</span></p>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="bottom-secondary-link ico-15 text-end">
+                                <p class="p-sm">
+                                    Developed By &#8658; Muhammad Ubaidullah || Abdullah Mansoor</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </footer>
+
+    </div>
+    <script src="../static/js/jquery-3.7.0.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
     <script>
-      function loadCarModels() {
-        var companyDropdown = document.getElementById("company");
-        var carModelDropdown = document.getElementById("car_models");
+        function loadCarModels() {
+            var companyDropdown = document.getElementById("company");
+            var carModelDropdown = document.getElementById("car_models");
 
-        // Clear the car models dropdown
-        carModelDropdown.innerHTML = "";
+            // Clear the car models dropdown
+            carModelDropdown.innerHTML = "";
 
-        // Add a default option
-        var defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.text = "Select Vehicle Model";
-        carModelDropdown.add(defaultOption);
+            // Add a default option
+            var defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.text = "Select Vehicle Model";
+            carModelDropdown.add(defaultOption);
 
-        // Get the selected company
-        var selectedCompany = companyDropdown.value;
+            // Get the selected company
+            var selectedCompany = companyDropdown.value;
 
-        // Make an AJAX request to get car models based on the selected company
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "/get_car_models?company=" + selectedCompany, true);
+            // Make an AJAX request to get car models based on the selected company
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/get_car_models?company=" + selectedCompany, true);
 
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState == XMLHttpRequest.DONE) {
-            if (xhr.status == 200) {
-              // Parse the JSON response and sort the models alphabetically
-              var models = JSON.parse(xhr.responseText);
-              models.sort(); // Sort alphabetically
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    if (xhr.status == 200) {
+                        // Parse the JSON response and sort the models alphabetically
+                        var models = JSON.parse(xhr.responseText);
+                        models.sort(); // Sort alphabetically
 
-              // Populate the car models dropdown
-              models.forEach(function (model) {
-                var newOption = document.createElement("option");
-                newOption.value = model;
-                newOption.innerHTML = model;
-                carModelDropdown.options.add(newOption);
-              });
-            } else {
-              console.error("Error loading car models");
-            }
-          }
-        };
+                        // Populate the car models dropdown
+                        models.forEach(function (model) {
+                            var newOption = document.createElement("option");
+                            newOption.value = model;
+                            newOption.innerHTML = model;
+                            carModelDropdown.options.add(newOption);
+                        });
+                    } else {
+                        console.error("Error loading car models");
+                    }
+                }
+            };
 
-        xhr.send();
-      }
+            xhr.send();
+        }
 
-      function form_handler(event) {
-        event.preventDefault(); // Don't submit the form normally
-      }
+        function form_handler(event) {
+            event.preventDefault();
+        }
 
-      function send_data() {
-        document.querySelector("form").addEventListener("submit", form_handler);
+        function send_data() {
+            document.querySelector("form").addEventListener("submit", form_handler);
 
-        var fd = new FormData(document.querySelector("form"));
+            var fd = new FormData(document.querySelector("form"));
 
-        var xhr = new XMLHttpRequest();
-
-        xhr.open("POST", "/predict", true);
-        document.getElementById("prediction").innerHTML =
-          "Wait! Predicting Price.....";
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState == XMLHttpRequest.DONE) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/predict", true);
             document.getElementById("prediction").innerHTML =
-              "Prediction: PKR " + xhr.responseText;
-          }
-        };
+                "Wait! Predicting Price.....";
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    document.getElementById("prediction").innerHTML =
+                        Swal.fire({
+                            title: "Your Car's Price is",
+                            text: xhr.responseText,
+                        });
+                }
+            };
 
-        xhr.onload = function () {};
+            xhr.onload = function () { };
 
-        xhr.send(fd);
-      }
+            xhr.send(fd);
+        }
     </script>
+    <script src="../static/js/sweetalert2@11.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="../static/js/jquery-3.7.0.min.js"></script>
+    <script src="../static/js/menu.js"></script>
+    <script src="../static/js/wow.js"></script>
+    <script src="../static/js/custom.js"></script>
+</body>
 
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script
-      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
-      integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
-      crossorigin="anonymous"
-    ></script>
-  </body>
 </html>

@@ -1,16 +1,17 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, g
 from flask_cors import CORS, cross_origin
-import pickle
 import pandas as pd
 import numpy as np
-import os
+import joblib
+from keras.models import load_model
 
 app = Flask(__name__)
 cors = CORS(app)
-with open("RandomForestRegressorModel.pkl", "rb") as file:
-    model = pickle.load(file)
 
-df = pd.read_csv("New_cleaned_data.csv")
+# Load the model and preprocessing pipeline
+model = load_model('mlp_model.h5')
+preprocessing_pipeline = joblib.load('preprocessing_pipeline.pkl')
+df = pd.read_csv("cleaned_data.csv")
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -21,7 +22,7 @@ def index():
     year = sorted(df["model_year"].unique(), reverse=True)
     fuel_type = df["engine_type"].unique()
     vehicle_color = sorted(df["color"].unique())
-    registrarion_city = sorted(df["registered_in"].unique())
+    registration_city = sorted(df["registered_in"].unique())
 
     return render_template(
         "index.html",
@@ -31,32 +32,21 @@ def index():
         years=year,
         fuel_types=fuel_type,
         vehicle_colors=vehicle_color,
-        registration_cities=registrarion_city,
+        registration_cities=registration_city,
     )
 
 
 @app.route("/get_car_models", methods=["GET"])
-@cross_origin()
 def get_car_models():
     selected_company = request.args.get("company")
-
-    # Add a print statement for debugging
-    print("Selected Company:", selected_company)
-
-    # Check if the selected company exists in the DataFrame
     if selected_company not in df["brand"].unique():
-        print("Error: Selected company not found.")
         return jsonify([])
-
-    # Filter car models based on the selected company
     filtered_models = df[df["brand"] == selected_company]["vehicle"].unique()
-
     return jsonify(filtered_models.tolist())
 
-
 @app.route("/predict", methods=["POST"])
-@cross_origin()
 def predict():
+    # Extract form data
     company = request.form.get("company")
     car_model = request.form.get("car_models")
     transmission_type = request.form.get("transmission_type")
@@ -66,39 +56,21 @@ def predict():
     registration_city = request.form.get("registration_city")
     driven = request.form.get("kilo_driven")
 
-    prediction = model.predict(
-        pd.DataFrame(
-            columns=[
-                "model_year",
-                "mileage",
-                "registered_in",
-                "color",
-                "brand",
-                "vehicle",
-                "transmission",
-                "engine_type",
-            ],
-            data=np.array(
-                [
-                    year,
-                    driven,
-                    registration_city,
-                    vehicle_color,
-                    company,
-                    car_model,
-                    transmission_type,
-                    fuel_type,
-                ]
-            ).reshape(1, 8),
-        )
+    # Create a DataFrame from the input data
+    input_data = pd.DataFrame(
+        data=np.array([year, driven, registration_city, vehicle_color, company, car_model, transmission_type, fuel_type]).reshape(1, 8),
+        columns=["model_year", "mileage", "registered_in", "color", "brand", "vehicle", "transmission", "engine_type"]
     )
 
-    print(prediction)
+    # Preprocess the input data
+    input_data_prepared = preprocessing_pipeline.transform(input_data)
+    input_data_prepared = input_data_prepared.toarray() if hasattr(input_data_prepared, "toarray") else input_data_prepared
 
-    return str(np.round(prediction[0], 2))
+    # Make prediction
+    prediction = model.predict(input_data_prepared)
 
+    predicted_price = round(float(prediction[0][0]), 2)
+    return f"PKR {predicted_price} (Lakhs)"
 
 if __name__ == "__main__":
     app.run(debug=True)
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
